@@ -8,6 +8,7 @@ import {
   STAGE_PASS_TARGETS,
   type PipelineStage,
 } from "@/lib/pipeline-labels";
+import { fetchBootstrapCached } from "@/lib/bootstrap-client";
 import { useCallback, useEffect, useState } from "react";
 import { MascotWidget } from "./mascot-widget";
 
@@ -37,9 +38,9 @@ export function AgentDock() {
   const [log, setLog] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const [sRes, bRes] = await Promise.all([
+    const [sRes, b] = await Promise.all([
       fetch("/api/agent/settings"),
-      fetch("/api/bootstrap"),
+      fetchBootstrapCached(),
     ]);
     if (sRes.ok) {
       const s = (await sRes.json()) as AgentSettingsRow;
@@ -49,10 +50,7 @@ export function AgentDock() {
       setEducationsText(r.educations.join("、"));
       setCitiesText(r.cities.join("、"));
     }
-    if (bRes.ok) {
-      const b = (await bRes.json()) as { assessments: AssessmentMeta[] };
-      setAssessments(b.assessments);
-    }
+    setAssessments(b.assessments);
   }, []);
 
   useEffect(() => {

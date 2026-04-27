@@ -4,6 +4,7 @@ import type { Assessment, CustomField } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
 import { MAIL_DEFAULTS } from "@/lib/agent-mail-templates";
 import { parseRulesJson, type AgentRules } from "@/lib/agent-rules";
+import { fetchBootstrapCached } from "@/lib/bootstrap-client";
 import { parseSelectOptions } from "@/lib/filters";
 
 type FieldType = "SELECT" | "TEXT" | "NUMBER";
@@ -53,14 +54,11 @@ export function SettingsView() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [bRes, aRes] = await Promise.all([
-        fetch("/api/bootstrap"),
+      const [bootstrap, aRes] = await Promise.all([
+        fetchBootstrapCached(),
         fetch("/api/agent/settings"),
       ]);
-      if (bRes.ok) {
-        const json = (await bRes.json()) as Payload;
-        setData(json);
-      }
+      setData(bootstrap);
       if (aRes.ok) {
         const s = (await aRes.json()) as AgentSettingsRow;
         syncMailFromRules(parseRulesJson(s.rulesJson));

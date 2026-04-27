@@ -28,7 +28,7 @@ export function PipelineBoard() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/candidates");
+      const res = await fetch("/api/candidates", { cache: "no-store" });
       if (!res.ok) throw new Error("fail");
       setData((await res.json()) as Payload);
     } finally {

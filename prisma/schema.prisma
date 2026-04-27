@@ -4,50 +4,18 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  }
-
-enum FieldType {
-  TEXT
-  NUMBER
-  SELECT
-}
-
-/// 招聘流程阶段（简历在各列下归类）
-enum PipelineStage {
-  RESUME_FIRST
-  PHONE
-  ONLINE_TEST
-  WRITTEN_EXAM
-  FIRST_INTERVIEW
-  SECOND_INTERVIEW
-  OFFER
-  HIRED
-  /// 初筛等未通过
-  REJECTED
-  /// 人才库（性格测试未通过等沉淀）
-  TALENT_POOL
-}
-
-enum CandidateSource {
-  REFERRAL
-  BOSS_ZHIPIN
-  JOB51
-  SHIXISENG
-  OTHER
+  url      = env("DATABASE_URL")
 }
 
 model CustomField {
   id        String   @id @default(cuid())
   key       String   @unique
   label     String
-  type      FieldType
-  /// JSON string array for SELECT, e.g. `["本科","硕士"]`
+  type      String   // 修复：把 enum 改成 String
   options   String?
-  /// NUMBER 类型建议区间（筛选与编辑提示；不强制）
   numberMin Float?
   numberMax Float?
   sortOrder Int      @default(0)
-  /// 是否在候选人列表/编辑中显示（关闭后数据仍保留，Agent 是否参考由筛选助手内勾选决定）
   inUse     Boolean  @default(true)
   values    CandidateFieldValue[]
 }
@@ -58,7 +26,6 @@ model Assessment {
   label     String
   maxScore  Float           @default(100)
   sortOrder Int             @default(0)
-  /// 是否在候选人列表/编辑中显示
   inUse     Boolean         @default(true)
   scores    CandidateScore[]
 }
@@ -69,15 +36,10 @@ model Candidate {
   email     String
   phone     String?
   note      String?
-  /// 流程阶段
-  stage            PipelineStage    @default(RESUME_FIRST)
-  /// 简历来源
-  source           CandidateSource  @default(OTHER)
-  /// 期望薪资（展示与 Agent 解析用，如 18-25K）
+  stage            String   @default("RESUME_FIRST") // 修复
+  source           String   @default("OTHER")        // 修复
   expectedSalary   String?
-  /// 简历截图/扫描件
   resumeImageUrl   String?
-  /// Agent 是否已处理当前阶段任务（移回队列可清空）
   agentProcessedAt DateTime?
 
   createdAt DateTime @default(now())
@@ -111,27 +73,21 @@ model CandidateScore {
   @@unique([candidateId, assessmentId])
 }
 
-/// 单例：Agent 开关、规则、吉祥物「噜噜」显示、最近运行日志
 model AgentSettings {
   id            String   @id @default("default")
   enabled       Boolean  @default(false)
   mascotHidden  Boolean  @default(false)
-  /// JSON：筛选规则、流程多选、性格测试门槛等
   rulesJson     String   @default("{}")
   lastRunAt     DateTime?
   lastRunLog    String?
   updatedAt     DateTime @updatedAt
 }
 
-/// 可撤回的访客入口：分享 /s/{token}，停用或过期后同链接即失效；可随时新建多条给不同批次
 model ShareLink {
   id        String   @id @default(cuid())
   token     String   @unique
-  /// 是否停用（停用后携带该 token 的 cookie 也会在下一次校验时失效）
   revoked   Boolean  @default(false)
-  /// 可选备注，便于你区分「给 A 公司 / 给导师」等
   note      String?
-  /// 可选：到达该时刻后自动视为无效（与 revoked 二选一或叠加均可）
   expiresAt DateTime?
   createdAt DateTime @default(now())
 }

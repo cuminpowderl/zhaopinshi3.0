@@ -1,7 +1,6 @@
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
+import { put } from "@vercel/blob";
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
@@ -15,18 +14,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "文件过大（最大 6MB）" }, { status: 400 });
   }
 
-  const ext =
-    file instanceof File && file.name.includes(".")
-      ? path.extname(file.name).slice(0, 8).toLowerCase() || ".png"
-      : ".png";
+  const original =
+    file instanceof File && typeof file.name === "string" && file.name.trim()
+      ? file.name.trim()
+      : "resume.png";
 
-  const safeExt = [".png", ".jpg", ".jpeg", ".webp", ".gif"].includes(ext) ? ext : ".png";
-  const name = `${randomUUID()}${safeExt}`;
-  const dir = path.join(process.cwd(), "public", "uploads", "resumes");
-  await mkdir(dir, { recursive: true });
-  const fsPath = path.join(dir, name);
-  await writeFile(fsPath, buf);
+  const uuid = randomUUID();
+  const ext = original.includes(".") ? original.split(".").pop()?.toLowerCase() : undefined;
+  const safeExt = ext && ["png", "jpg", "jpeg", "webp", "gif"].includes(ext) ? ext : "png";
+  const pathname = `resumes/${uuid}.${safeExt}`;
 
-  const url = `/uploads/resumes/${name}`;
-  return NextResponse.json({ url, mime: (file as File).type || "image/png" });
+  try {
+    const blob = await put(pathname, buf, {
+      access: "public",
+      contentType: (file as File).type || `image/${safeExt === "jpg" ? "jpeg" : safeExt}`,
+      addRandomSuffix: false,
+    });
+    return NextResponse.json({ url: blob.url, mime: blob.contentType });
+  } catch (e) {
+    return NextResponse.json(
+      {
+        error:
+          "上传失败：请在 Vercel 项目中配置 Blob（环境变量 BLOB_READ_WRITE_TOKEN），或本地改用传统写盘实现。",
+        detail: e instanceof Error ? e.message : String(e),
+      },
+      { status: 500 },
+    );
+  }
 }

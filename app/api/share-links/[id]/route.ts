@@ -20,7 +20,8 @@ export async function PATCH(
         // 新 token 视为重新发放：旧地址作废，且本条恢复为可访问（若需再关，可再点「设为私密」）
         data: { token, revoked: false, expiresAt: null },
       });
-      return NextResponse.json({ link: row });
+      const inviteUrl = new URL(`/s/${row.token}`, req.url).toString();
+      return NextResponse.json({ link: row, inviteUrl });
     } catch {
       return NextResponse.json({ error: "记录不存在" }, { status: 404 });
     }
@@ -32,7 +33,8 @@ export async function PATCH(
         where: { id },
         data: { revoked: body.revoked },
       });
-      return NextResponse.json({ link: row });
+      const inviteUrl = new URL(`/s/${row.token}`, req.url).toString();
+      return NextResponse.json({ link: row, inviteUrl });
     } catch {
       return NextResponse.json({ error: "记录不存在" }, { status: 404 });
     }

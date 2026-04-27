@@ -48,21 +48,44 @@ function parseModelJson(raw: string): OcrResult {
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as { imageUrl?: string; mime?: string };
   const imageUrl = body.imageUrl?.trim();
-  if (!imageUrl?.startsWith("/uploads/resumes/")) {
-    return NextResponse.json({ error: "无效的图片地址" }, { status: 400 });
+  if (!imageUrl) {
+    return NextResponse.json({ error: "缺少图片地址" }, { status: 400 });
   }
 
-  const fsPath = path.join(process.cwd(), "public", imageUrl.replace(/^\//, ""));
   let base64: string;
-  const mime =
+  let mime: string =
     typeof body.mime === "string" && body.mime.startsWith("image/")
       ? body.mime
       : mimeFromUrl(imageUrl);
-  try {
-    const buf = await readFile(fsPath);
-    base64 = buf.toString("base64");
-  } catch {
-    return NextResponse.json({ error: "读取图片失败" }, { status: 400 });
+
+  // 兼容两种来源：
+  // 1) 旧的本地相对路径 /uploads/resumes/...（dev）
+  // 2) Vercel Blob 的公网地址 https://...（prod）
+  if (imageUrl.startsWith("/uploads/resumes/")) {
+    const fsPath = path.join(process.cwd(), "public", imageUrl.replace(/^\//, ""));
+    try {
+      const buf = await readFile(fsPath);
+      base64 = buf.toString("base64");
+    } catch {
+      return NextResponse.json({ error: "读取图片失败" }, { status: 400 });
+    }
+  } else if (/^https?:\/\//i.test(imageUrl)) {
+    try {
+      const res = await fetch(imageUrl);
+      if (!res.ok) return NextResponse.json({ error: "读取图片失败" }, { status: 400 });
+      const ct = res.headers.get("content-type");
+      if (ct?.startsWith("image/")) mime = ct;
+      const ab = await res.arrayBuffer();
+      const buf = Buffer.from(ab);
+      if (buf.length > 8 * 1024 * 1024) {
+        return NextResponse.json({ error: "图片过大（最大 8MB）" }, { status: 400 });
+      }
+      base64 = buf.toString("base64");
+    } catch {
+      return NextResponse.json({ error: "读取图片失败" }, { status: 400 });
+    }
+  } else {
+    return NextResponse.json({ error: "无效的图片地址" }, { status: 400 });
   }
 
   const key = process.env.OPENAI_API_KEY;

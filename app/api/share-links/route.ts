@@ -24,5 +24,6 @@ export async function POST(req: NextRequest) {
       expiresAt,
     },
   });
-  return NextResponse.json({ link: row });
+  const inviteUrl = new URL(`/s/${row.token}`, req.url).toString();
+  return NextResponse.json({ link: row, inviteUrl });
 }

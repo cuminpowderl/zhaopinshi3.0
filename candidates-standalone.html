@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>候选人 · 朝聘</title>
+    <style>
+      /* 与 app/globals.css @theme 一致 */
+      :root {
+        --font-sans: ui-sans-serif, system-ui, "PingFang SC", "Microsoft YaHei", sans-serif;
+        --font-display: ui-sans-serif, system-ui, "PingFang SC", "Microsoft YaHei", sans-serif;
+        --color-surface: oklch(0.99 0.004 95);
+        --color-surface-2: oklch(0.97 0.008 95);
+        --color-border: oklch(0.9 0.012 95);
+        --color-muted: oklch(0.52 0.02 260);
+        --color-fg: oklch(0.22 0.02 260);
+        --color-fg-soft: oklch(0.38 0.02 260);
+        --color-brand: oklch(0.52 0.14 35);
+        --color-brand-hover: oklch(0.46 0.14 35);
+        --color-brand-soft: oklch(0.94 0.04 55);
+        --overlay-scrim: oklch(0.22 0.02 260 / 0.25);
+        --overlay-light: oklch(0.22 0.02 260 / 0.2);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: var(--font-sans);
+        background: var(--color-surface);
+        color: var(--color-fg);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      button {
+        font-family: inherit;
+      }
+
+      .layout {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        border-bottom: 1px solid var(--color-border);
+        background: color-mix(in oklch, var(--color-surface) 90%, transparent);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+      }
+
+      .header-inner {
+        margin: 0 auto;
+        max-width: 72rem;
+        height: 3.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 0 1rem;
+      }
+
+      @media (min-width: 640px) {
+        .header-inner {
+          padding: 0 1.5rem;
+        }
+      }
+
+      .brand-mark {
+        display: flex;
+        height: 2rem;
+        width: 2rem;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
+        background: var(--color-brand);
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #fff;
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+      }
+
+      .brand-text {
+        font-family: var(--font-display);
+        font-size: 1.125rem;
+        font-weight: 600;
+        letter-spacing: -0.025em;
+        color: var(--color-fg);
+      }
+
+      .brand-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+      }
+
+      .tagline {
+        display: none;
+        font-size: 0.75rem;
+        color: var(--color-muted);
+        max-width: 220px;
+        line-height: 1.375;
+      }
+
+      @media (min-width: 640px) {
+        .tagline {
+          display: block;
+        }
+      }
+
+      .nav {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .nav a,
+      .nav button {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        border-radius: 0.5rem;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--color-fg-soft);
+        transition: background-color 0.15s, color 0.15s;
+      }
+
+      .nav a:hover,
+      .nav button.nav-ghost:hover {
+        background: var(--color-surface-2);
+        color: var(--color-fg);
+      }
+
+      .nav a.active {
+        background: var(--color-brand-soft);
+        color: var(--color-brand);
+      }
+
+      .nav button.nav-accent {
+        color: var(--color-brand);
+      }
+
+      .nav button.nav-accent:hover {
+        background: var(--color-brand-soft);
+      }
+
+      main {
+        margin: 0 auto;
+        width: 100%;
+        max-width: 72rem;
+        flex: 1;
+        padding: 2rem 1rem;
+      }
+
+      @media (min-width: 640px) {
+        main {
+          padding: 2rem 1.5rem;
+        }
+      }
+
+      .footer {
+        border-top: 1px solid var(--color-border);
+        padding: 1rem;
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--color-muted);
+      }
+
+      /* CandidatesView */
+      .stack-6 > * + * {
+        margin-top: 1.5rem;
+      }
+
+      .page-title-row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      @media (min-width: 640px) {
+        .page-title-row {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
+
+      .h1-page {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--color-fg);
+      }
+
+      .sub-count {
+        margin: 0.125rem 0 0;
+        font-size: 0.875rem;
+        color: var(--color-muted);
+      }
+
+      .sub-count .num {
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+        color: var(--color-fg);
+      }
+
+      .btn-brand {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        border-radius: 0.75rem;
+        background: var(--color-brand);
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #fff;
+      }
+
+      .btn-brand:hover {
+        background: var(--color-brand-hover);
+      }
+
+      .card {
+        border-radius: 1rem;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface);
+        padding: 1rem;
+      }
+
+      @media (min-width: 640px) {
+        .card {
+          padding: 1.25rem;
+        }
+      }
+
+      .filter-head {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      @media (min-width: 640px) {
+        .filter-head {
+          flex-direction: row;
+          align-items: flex-end;
+          justify-content: space-between;
+        }
+      }
+
+      .filter-title {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--color-fg);
+      }
+
+      .filter-hint {
+        margin: 0.125rem 0 0;
+        font-size: 0.75rem;
+        color: var(--color-muted);
+      }
+
+      .filter-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .btn-outline {
+        border-radius: 0.75rem;
+        border: 1px solid var(--color-border);
+        background: transparent;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--color-fg-soft);
+        cursor: pointer;
+      }
+
+      .btn-outline:hover {
+        background: var(--color-surface-2);
+      }
+
+      .btn-brand-sm {
+        border: none;
+        border-radius: 0.75rem;
+        background: var(--color-brand);
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #fff;
+        cursor: pointer;
+      }
+
+      .btn-brand-sm:hover {
+        background: var(--color-brand-hover);
+      }
+
+      .btn-brand-sm:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .filter-grid {
+        margin-top: 1.25rem;
+        display: grid;
+        gap: 1rem;
+      }
+
+      @media (min-width: 640px) {
+        .filter-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .filter-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      .field-block label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--color-fg-soft);
+        margin-bottom: 0.375rem;
+      }
+
+      .field-block .type-hint {
+        margin-left: 0.25rem;
+        font-weight: 400;
+        color: var(--color-muted);
+      }
+
+      .input,
+      .select {
+        width: 100%;
+        border-radius: 0.75rem;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-2);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        color: var(--color-fg);
+        outline: none;
+      }
+
+      .input:focus,
+      .select:focus {
+        box-shadow: 0 0 0 2px var(--color-brand);
+      }
+
+      .pair {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .pair .input {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .table-wrap {
+        overflow: hidden;
+        border-radius: 1rem;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface);
+      }
+
+      .table-scroll {
+        overflow-x: auto;
+      }
+
+      table.data {
+        width: 100%;
+        min-width: 640px;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.875rem;
+      }
+
+      thead tr {
+        border-bottom: 1px solid var(--color-border);
+        background: var(--color-surface-2);
+      }
+
+      thead th {
+        padding: 0.75rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--color-muted);
+      }
+
+      tbody tr {
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      tbody tr:last-child {
+        border-bottom: none;
+      }
+
+      tbody tr:hover {
+        background: color-mix(in oklch, var(--color-surface-2) 80%, transparent);
+      }
+
+      tbody td {
+        padding: 0.75rem 1rem;
+      }
+
+      .td-name {
+        font-weight: 500;
+        color: var(--color-fg);
+      }
+
+      .td-soft {
+        color: var(--color-fg-soft);
+      }
+
+      .td-soft.nowrap,
+      .nowrap {
+        white-space: nowrap;
+      }
+
+      .td-soft.tiny {
+        font-size: 0.75rem;
+      }
+
+      .td-nums {
+        font-variant-numeric: tabular-nums;
+      }
+
+      .link-edit {
+        border: none;
+        background: none;
+        padding: 0;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--color-brand);
+        cursor: pointer;
+      }
+
+      .link-edit:hover {
+        text-decoration: underline;
+      }
+
+      .empty-cell {
+        padding: 2.5rem 1rem;
+        text-align: center;
+        color: var(--color-muted);
+      }
+
+      .th-actions {
+        width: 6rem;
+      }
+
+      /* Modal */
+      .modal-root {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: none;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 0;
+      }
+
+      .modal-root.show {
+        display: flex;
+      }
+
+      @media (min-width: 640px) {
+        .modal-root {
+          align-items: center;
+          padding: 1rem;
+        }
+      }
+
+      .modal-backdrop {
+        position: absolute;
+        inset: 0;
+        border: none;
+        padding: 0;
+        background: var(--overlay-scrim);
+        -webkit-backdrop-filter: blur(2px);
+        backdrop-filter: blur(2px);
+        cursor: pointer;
+      }
+
+      .modal-panel {
+        position: relative;
+        max-height: 92vh;
+        width: 100%;
+        max-width: 32rem;
+        overflow-y: auto;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface);
+        box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        border-radius: 1rem 1rem 0 0;
+      }
+
+      @media (min-width: 640px) {
+        .modal-panel {
+          border-radius: 1rem;
+        }
+      }
+
+      .modal-head {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--color-border);
+        background: var(--color-surface);
+        padding: 1rem 1.25rem;
+      }
+
+      .modal-head h2 {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--color-fg);
+      }
+
+      .icon-btn {
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.375rem;
+        background: transparent;
+        color: var(--color-muted);
+        cursor: pointer;
+      }
+
+      .icon-btn:hover {
+        background: var(--color-surface-2);
+        color: var(--color-fg);
+      }
+
+      .modal-body {
+        padding: 1.25rem;
+      }
+
+      .modal-body > * + * {
+        margin-top: 1rem;
+      }
+
+      .err-banner {
+        border-radius: 0.75rem;
+        background: color-mix(in oklch, var(--color-brand-soft) 80%, transparent);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        color: var(--color-brand);
+      }
+
+      .resume-box {
+        border-radius: 0.75rem;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-2);
+        padding: 0.75rem;
+      }
+
+      .resume-box > * + * {
+        margin-top: 0.5rem;
+      }
+
+      .resume-label {
+        margin: 0;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--color-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .resume-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .btn-xs-brand {
+        display: inline-flex;
+        cursor: pointer;
+        border-radius: 0.5rem;
+        border: none;
+        background: var(--color-brand);
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #fff;
+      }
+
+      .btn-xs-brand:hover {
+        background: var(--color-brand-hover);
+      }
+
+      .btn-xs-outline {
+        border-radius: 0.5rem;
+        border: 1px solid var(--color-border);
+        background: transparent;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        cursor: pointer;
+      }
+
+      .btn-xs-outline:hover {
+        background: var(--color-surface);
+      }
+
+      .btn-xs-outline:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .preview-img {
+        margin-top: 0.5rem;
+        max-height: 10rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--color-border);
+        object-fit: contain;
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 0.75rem;
+      }
+
+      @media (min-width: 640px) {
+        .form-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .span-2 {
+          grid-column: span 2;
+        }
+      }
+
+      .form-grid label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--color-fg-soft);
+        margin-bottom: 0.375rem;
+      }
+
+      .check-line {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        color: var(--color-fg-soft);
+      }
+
+      .section-label {
+        margin: 0 0 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--color-muted);
+      }
+
+      .score-grid {
+        display: grid;
+        gap: 0.75rem;
+      }
+
+      @media (min-width: 640px) {
+        .score-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      textarea.input {
+        resize: none;
+        min-height: 4.5rem;
+      }
+
+      .modal-foot {
+        position: sticky;
+        bottom: 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        border-top: 1px solid var(--color-border);
+        background: var(--color-surface);
+        padding: 1rem 1.25rem;
+      }
+
+      .btn-text {
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--color-fg);
+      }
+
+      .btn-text:hover {
+        text-decoration: underline;
+      }
+
+      .btn-text-muted {
+        color: var(--color-muted);
+      }
+
+      .btn-text-muted:hover {
+        color: var(--color-brand);
+        text-decoration: none;
+      }
+
+      .foot-btns {
+        display: flex;
+        gap: 0.5rem;
+        margin-left: auto;
+      }
+
+      /* About */
+      .about-panel {
+        position: relative;
+        width: 100%;
+        max-width: 28rem;
+        border-radius: 1rem;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-2);
+        padding: 1.5rem;
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+      }
+
+      .about-list {
+        margin: 1.25rem 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .about-list li {
+        display: flex;
+        gap: 0.625rem;
+        font-size: 0.875rem;
+        line-height: 1.625;
+        color: var(--color-fg-soft);
+      }
+
+      .about-list li + li {
+        margin-top: 0.75rem;
+      }
+
+      .bullet {
+        margin-top: 0.5rem;
+        height: 0.375rem;
+        width: 0.375rem;
+        flex-shrink: 0;
+        border-radius: 999px;
+        background: currentColor;
+        opacity: 0.4;
+      }
+
+      /* Agent stub */
+      .agent-panel {
+        position: relative;
+        width: 100%;
+        max-width: 28rem;
+        border-radius: 1rem;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface);
+        padding: 1.25rem;
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+      }
+
+      .agent-panel h2 {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 1.125rem;
+        font-weight: 600;
+      }
+
+      .agent-panel p {
+        margin: 0.75rem 0 0;
+        font-size: 0.875rem;
+        color: var(--color-fg-soft);
+        line-height: 1.6;
+      }
+
+      /* Mascot */
+      .mascot {
+        position: fixed;
+        right: 0;
+        top: 50%;
+        z-index: 100;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+
+      .mascot-btn {
+        display: block;
+        border: 1px solid color-mix(in oklch, var(--color-border) 60%, transparent);
+        background: var(--color-surface);
+        padding: 0.25rem;
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        cursor: pointer;
+        outline: none;
+      }
+
+      .mascot-btn:focus-visible {
+        box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-brand) 30%, transparent);
+      }
+
+      .mascot-note {
+        margin-top: 0.25rem;
+        max-width: 4.5rem;
+        text-align: right;
+        padding-right: 0.25rem;
+        font-size: 10px;
+        line-height: 1.25;
+        color: var(--color-muted);
+      }
+
+      .mascot-side {
+        margin-top: 0.125rem;
+        padding-right: 0.25rem;
+        text-align: right;
+        font-size: 10px;
+        color: var(--color-muted);
+        text-decoration: underline;
+        text-decoration-style: dotted;
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-family: inherit;
+      }
+
+      .mascot-side:hover {
+        color: var(--color-fg);
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      /* 简介 / 筛选助手：始终垂直居中 */
+      .modal-root.modal-centered {
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+    </style>
+  </head>
+  <body id="top">
+    <div class="layout">
+      <header class="header">
+        <div class="header-inner">
+          <a class="brand-link" href="#top">
+            <span class="brand-mark">朝</span>
+            <span class="brand-text">朝聘</span>
+          </a>
+          <p class="tagline">硬性条件 + 测评成绩，一体化筛选</p>
+          <nav class="nav">
+            <a class="nav-ghost" href="#top" data-tip="静态演示：仅本页可交互">总览</a>
+            <a class="active" href="#top">候选人</a>
+            <a class="nav-ghost" href="#top" data-tip="静态演示">流程看板</a>
+            <a class="nav-ghost" href="#top" data-tip="静态演示">筛选字段设置</a>
+            <button type="button" class="nav-accent" id="btn-open-agent">筛选助手</button>
+            <button type="button" class="nav-ghost" id="btn-open-about">简介</button>
+          </nav>
+        </div>
+      </header>
+
+      <main>
+        <div class="stack-6" id="candidates-root">
+          <div class="page-title-row">
+            <div>
+              <h1 class="h1-page">候选人</h1>
+              <p class="sub-count">
+                共 <span class="num" id="count-num">0</span> 人（当前筛选结果）
+              </p>
+            </div>
+            <button type="button" class="btn-brand" id="btn-new">新建候选人</button>
+          </div>
+
+          <div class="card">
+            <div class="filter-head">
+              <div>
+                <h2 class="filter-title">筛选候选人</h2>
+                <p class="filter-hint">
+                  字段与测评在「筛选字段设置」里维护；这里只筛选。学历、年限、城市在编辑候选人时填写。
+                </p>
+              </div>
+              <div class="filter-actions">
+                <button type="button" class="btn-outline" id="btn-clear-filter">清空</button>
+                <button type="button" class="btn-brand-sm" id="btn-apply-filter">应用筛选</button>
+              </div>
+            </div>
+            <div class="filter-grid">
+              <div class="field-block">
+                <label for="f-stage">流程阶段</label>
+                <select class="select" id="f-stage">
+                  <option value="">全部阶段</option>
+                </select>
+              </div>
+              <div class="field-block">
+                <label for="f-education"
+                  >学历<span class="type-hint">(选项)</span></label
+                >
+                <select class="select" id="f-education">
+                  <option value="">全部</option>
+                  <option>专科</option>
+                  <option>本科</option>
+                  <option>硕士</option>
+                  <option>博士</option>
+                </select>
+              </div>
+              <div class="field-block">
+                <label for="f-years-min"
+                  >工作年限<span class="type-hint">(数字)</span></label
+                >
+                <div class="pair">
+                  <input
+                    class="input"
+                    type="number"
+                    id="f-years-min"
+                    placeholder="最小"
+                  />
+                  <input
+                    class="input"
+                    type="number"
+                    id="f-years-max"
+                    placeholder="最大"
+                  />
+                </div>
+              </div>
+              <div class="field-block">
+                <label for="f-city"
+                  >期望城市<span class="type-hint">(文本)</span></label
+                >
+                <input
+                  class="input"
+                  id="f-city"
+                  placeholder="完全匹配"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="field-block">
+                <label for="a-written-min"
+                  >笔试<span class="type-hint">(0–100)</span></label
+                >
+                <div class="pair">
+                  <input
+                    class="input"
+                    type="number"
+                    id="a-written-min"
+                    placeholder="最低分"
+                  />
+                  <input
+                    class="input"
+                    type="number"
+                    id="a-written-max"
+                    placeholder="最高分"
+                  />
+                </div>
+              </div>
+              <div class="field-block">
+                <label for="a-coding-min"
+                  >机试<span class="type-hint">(0–100)</span></label
+                >
+                <div class="pair">
+                  <input
+                    class="input"
+                    type="number"
+                    id="a-coding-min"
+                    placeholder="最低分"
+                  />
+                  <input
+                    class="input"
+                    type="number"
+                    id="a-coding-max"
+                    placeholder="最高分"
+                  />
+                </div>
+              </div>
+              <div class="field-block">
+                <label for="a-personality-min"
+                  >性格测试<span class="type-hint">(0–100)</span></label
+                >
+                <div class="pair">
+                  <input
+                    class="input"
+                    type="number"
+                    id="a-personality-min"
+                    placeholder="最低分"
+                  />
+                  <input
+                    class="input"
+                    type="number"
+                    id="a-personality-max"
+                    placeholder="最高分"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <div class="table-scroll">
+              <table class="data">
+                <thead>
+                  <tr>
+                    <th>姓名</th>
+                    <th>邮箱</th>
+                    <th class="nowrap">阶段</th>
+                    <th class="nowrap">来源</th>
+                    <th class="nowrap">期望薪资</th>
+                    <th class="nowrap">学历</th>
+                    <th class="nowrap">工作年限</th>
+                    <th class="nowrap">期望城市</th>
+                    <th class="nowrap">笔试</th>
+                    <th class="nowrap">机试</th>
+                    <th class="nowrap">性格测试</th>
+                    <th class="th-actions"></th>
+                  </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="footer">朝聘 · 个人作品集演示</footer>
+    </div>
+
+    <!-- 吉祥物（与 mascot-widget SVG 回退一致） -->
+    <div class="mascot" id="mascot">
+      <button type="button" class="mascot-btn" id="mascot-open" aria-label="打开筛选助手（噜噜）">
+        <svg width="44" height="72" viewBox="0 0 88 96" aria-hidden="true">
+          <defs>
+            <linearGradient id="mw-fur" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24" />
+              <stop offset="100%" stop-color="#ea580c" />
+            </linearGradient>
+          </defs>
+          <ellipse cx="44" cy="88" rx="28" ry="8" fill="black" opacity="0.1" />
+          <g transform="translate(0,6)">
+            <path
+              d="M12 38 Q8 12 26 18 Q44 4 62 18 Q80 12 76 38 Q84 58 44 70 Q4 58 12 38 Z"
+              fill="url(#mw-fur)"
+            />
+            <ellipse cx="28" cy="30" rx="10" ry="14" fill="#fed7aa" opacity="0.95" />
+            <ellipse cx="60" cy="30" rx="10" ry="14" fill="#fed7aa" opacity="0.95" />
+            <circle cx="34" cy="42" r="4" fill="#1f2937" />
+            <circle cx="54" cy="42" r="4" fill="#1f2937" />
+          </g>
+        </svg>
+      </button>
+      <span class="mascot-note">噜噜 · 探头 · 悬停全身 · 点按打开</span>
+      <button type="button" class="mascot-side" id="mascot-flip">换到左侧</button>
+    </div>
+
+    <!-- 编辑/新建 -->
+    <div class="modal-root" id="modal-editor" role="dialog" aria-modal="true">
+      <button type="button" class="modal-backdrop" data-close="editor" aria-label="关闭"></button>
+      <div class="modal-panel">
+        <div class="modal-head">
+          <h2 id="editor-title">编辑候选人</h2>
+          <button type="button" class="icon-btn" data-close="editor" aria-label="关闭">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="err-banner hidden" id="editor-err"></div>
+          <div class="resume-box">
+            <p class="resume-label">简历图片</p>
+            <div class="resume-actions">
+              <label class="btn-xs-brand">
+                上传图片
+                <input type="file" accept="image/*" class="hidden" id="resume-file" />
+              </label>
+              <button type="button" class="btn-xs-outline" id="btn-ocr" disabled>识别并填充</button>
+            </div>
+            <img class="preview-img hidden" id="resume-preview" alt="简历预览" />
+            <p class="tiny td-soft hidden" id="ocr-notice"></p>
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <label for="ed-source">来源</label>
+              <select class="select" id="ed-source"></select>
+            </div>
+            <div>
+              <label for="ed-stage">流程阶段</label>
+              <select class="select" id="ed-stage"></select>
+            </div>
+            <div class="span-2">
+              <label for="ed-salary">期望薪资</label>
+              <input class="input" id="ed-salary" placeholder="如 18-25K" />
+            </div>
+            <label class="check-line span-2 hidden" id="ed-requeue-wrap">
+              <input type="checkbox" id="ed-requeue" />
+              移回「简历初筛」并清空 Agent 处理标记（可再次自动初筛）
+            </label>
+            <div>
+              <label for="ed-name">姓名 *</label>
+              <input class="input" id="ed-name" />
+            </div>
+            <div>
+              <label for="ed-email">邮箱 *</label>
+              <input class="input" type="email" id="ed-email" />
+            </div>
+            <div class="span-2">
+              <label for="ed-phone">手机</label>
+              <input class="input" id="ed-phone" />
+            </div>
+          </div>
+
+          <div>
+            <p class="section-label">自定义字段</p>
+            <div class="modal-body" style="padding: 0; margin: 0">
+              <div>
+                <label for="ed-edu">学历</label>
+                <select class="select" id="ed-edu">
+                  <option value="">未填</option>
+                  <option>专科</option>
+                  <option>本科</option>
+                  <option>硕士</option>
+                  <option>博士</option>
+                </select>
+              </div>
+              <div style="margin-top: 0.75rem">
+                <label for="ed-years">工作年限</label>
+                <input class="input" type="number" id="ed-years" placeholder="数字" />
+              </div>
+              <div style="margin-top: 0.75rem">
+                <label for="ed-city">期望城市</label>
+                <input class="input" id="ed-city" />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p class="section-label">测评成绩</p>
+            <div class="score-grid">
+              <div>
+                <label for="ed-written">笔试 <span class="type-hint">/ 100</span></label>
+                <input class="input" type="number" id="ed-written" />
+              </div>
+              <div>
+                <label for="ed-coding">机试 <span class="type-hint">/ 100</span></label>
+                <input class="input" type="number" id="ed-coding" />
+              </div>
+              <div>
+                <label for="ed-personality">性格测试 <span class="type-hint">/ 100</span></label>
+                <input class="input" type="number" id="ed-personality" />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label for="ed-note">备注</label>
+            <textarea class="input" id="ed-note" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <div id="edit-only-actions" style="display: flex; flex-wrap: wrap; gap: 0.75rem">
+            <button type="button" class="btn-text" id="btn-talent-pool">淘汰并入人才库（发邮件）</button>
+            <button type="button" class="btn-text btn-text-muted" id="btn-delete">删除</button>
+          </div>
+          <div class="foot-btns">
+            <button type="button" class="btn-outline" data-close="editor">取消</button>
+            <button type="button" class="btn-brand-sm" id="btn-save">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 简介 -->
+    <div class="modal-root modal-centered" id="modal-about" role="dialog" aria-modal="true">
+      <button type="button" class="modal-backdrop" data-close="about" aria-label="关闭"></button>
+      <div class="about-panel">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem">
+          <div>
+            <p style="margin: 0; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em; color: var(--color-muted); text-transform: uppercase">产品简介</p>
+            <h2 style="margin: 0.25rem 0 0; font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; color: var(--color-fg)" id="about-title">朝聘</h2>
+          </div>
+          <button type="button" class="icon-btn" data-close="about" aria-label="关闭">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <ul class="about-list">
+          <li>
+            <span class="bullet" aria-hidden="true"></span>
+            <span
+              >筛选规则和 Agent 行为均可自定义，适配不同招聘流程。支持按学历、年限、笔试/机试成绩等多维度组合筛选，结果实时生效。</span
+            >
+          </li>
+          <li>
+            <span class="bullet" aria-hidden="true"></span>
+            <span>内置招聘 Agent，可自动完成简历初筛与面试邀约邮件发送。</span>
+          </li>
+          <li>
+            <span class="bullet" aria-hidden="true"></span>
+            <span>通过链接在线访问，无需部署，即开即用。</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 筛选助手（静态说明） -->
+    <div class="modal-root modal-centered" id="modal-agent" role="dialog" aria-modal="true">
+      <button type="button" class="modal-backdrop" data-close="agent" aria-label="关闭"></button>
+      <div class="agent-panel">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem">
+          <h2>筛选助手</h2>
+          <button type="button" class="icon-btn" data-close="agent" aria-label="关闭">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <p>
+          本文件为离线静态复刻页：规则配置、自动初筛与邮件发送需连接朝聘完整后端。表格与筛选、编辑框可在本页内本地演示（数据仅存于浏览器内存，刷新后恢复示例数据）。
+        </p>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var STAGE_LABEL = {
+          RESUME_FIRST: "简历初筛",
+          PHONE: "电话沟通",
+          ONLINE_TEST: "测试",
+          WRITTEN_EXAM: "笔试",
+          FIRST_INTERVIEW: "初试",
+          SECOND_INTERVIEW: "复试",
+          OFFER: "offer发放",
+          HIRED: "入职",
+          REJECTED: "未通过",
+          TALENT_POOL: "人才库",
+        };
+
+        var PIPELINE_STAGES = Object.keys(STAGE_LABEL);
+
+        var SOURCE_OPTIONS = [
+          { value: "REFERRAL", label: "内推" },
+          { value: "BOSS_ZHIPIN", label: "Boss直聘" },
+          { value: "JOB51", label: "前程无忧" },
+          { value: "SHIXISENG", label: "实习僧" },
+          { value: "OTHER", label: "其他" },
+        ];
+
+        function sourceLabel(s) {
+          var o = SOURCE_OPTIONS.find(function (x) {
+            return x.value === s;
+          });
+          return o ? o.label : "其他";
+        }
+
+        function deepClone(arr) {
+          return JSON.parse(JSON.stringify(arr));
+        }
+
+        /* prisma/seed.ts 示例数据 */
+        var SEED = [
+          {
+            id: "seed-1",
+            name: "林晨",
+            email: "linchen@example.com",
+            phone: "13800001001",
+            note: "",
+            stage: "RESUME_FIRST",
+            source: "BOSS_ZHIPIN",
+            expectedSalary: "25-35K",
+            education: "硕士",
+            years: "4",
+            city: "上海",
+            written: 82,
+            coding: 76,
+            personality: 72,
+          },
+          {
+            id: "seed-2",
+            name: "周予安",
+            email: "zhouya@example.com",
+            phone: "13800001002",
+            note: "",
+            stage: "ONLINE_TEST",
+            source: "REFERRAL",
+            expectedSalary: "15-22K",
+            education: "本科",
+            years: "2",
+            city: "杭州",
+            written: 71,
+            coding: 88,
+            personality: 55,
+          },
+          {
+            id: "seed-3",
+            name: "沈知远",
+            email: "shenzy@example.com",
+            phone: "13800001003",
+            note: "",
+            stage: "FIRST_INTERVIEW",
+            source: "JOB51",
+            expectedSalary: "30-40K",
+            education: "本科",
+            years: "6",
+            city: "深圳",
+            written: 90,
+            coding: 70,
+            personality: 80,
+          },
+          {
+            id: "seed-4",
+            name: "顾清和",
+            email: "guqh@example.com",
+            phone: "13800001004",
+            note: "",
+            stage: "OFFER",
+            source: "SHIXISENG",
+            expectedSalary: "面议",
+            education: "博士",
+            years: "1",
+            city: "北京",
+            written: 94,
+            coding: 92,
+            personality: 88,
+          },
+          {
+            id: "seed-5",
+            name: "江晚晴",
+            email: "jiangwq@example.com",
+            phone: "13800001005",
+            note: "",
+            stage: "RESUME_FIRST",
+            source: "OTHER",
+            expectedSalary: "20-28K",
+            education: "硕士",
+            years: "3",
+            city: "上海",
+            written: 68,
+            coding: 81,
+            personality: 48,
+          },
+        ];
+
+        var candidates = deepClone(SEED);
+        var filtered = candidates.slice();
+        var editorMode = "edit";
+        var editingId = null;
+        var resumeObjectUrl = null;
+
+        var el = {
+          tbody: document.getElementById("tbody"),
+          count: document.getElementById("count-num"),
+          stage: document.getElementById("f-stage"),
+          modalEditor: document.getElementById("modal-editor"),
+          modalAbout: document.getElementById("modal-about"),
+          modalAgent: document.getElementById("modal-agent"),
+        };
+
+        function fillStageSelect(select) {
+          PIPELINE_STAGES.forEach(function (k) {
+            var o = document.createElement("option");
+            o.value = k;
+            o.textContent = STAGE_LABEL[k];
+            select.appendChild(o);
+          });
+        }
+
+        fillStageSelect(el.stage);
+        var edStage = document.getElementById("ed-stage");
+        fillStageSelect(edStage);
+        var edSource = document.getElementById("ed-source");
+        SOURCE_OPTIONS.forEach(function (s) {
+          var o = document.createElement("option");
+          o.value = s.value;
+          o.textContent = s.label;
+          edSource.appendChild(o);
+        });
+
+        function numOrNull(v) {
+          var t = String(v || "").trim();
+          if (!t) return null;
+          var n = Number(t);
+          return Number.isFinite(n) ? n : null;
+        }
+
+        function applyFilters() {
+          var stage = el.stage.value;
+          var edu = document.getElementById("f-education").value.trim();
+          var city = document.getElementById("f-city").value.trim();
+          var yMin = numOrNull(document.getElementById("f-years-min").value);
+          var yMax = numOrNull(document.getElementById("f-years-max").value);
+          var wMin = numOrNull(document.getElementById("a-written-min").value);
+          var wMax = numOrNull(document.getElementById("a-written-max").value);
+          var cMin = numOrNull(document.getElementById("a-coding-min").value);
+          var cMax = numOrNull(document.getElementById("a-coding-max").value);
+          var pMin = numOrNull(document.getElementById("a-personality-min").value);
+          var pMax = numOrNull(document.getElementById("a-personality-max").value);
+
+          filtered = candidates.filter(function (r) {
+            if (stage && r.stage !== stage) return false;
+            if (edu && r.education !== edu) return false;
+            if (city && r.city !== city) return false;
+            var y = Number(r.years);
+            if (yMin != null && (Number.isNaN(y) || y < yMin)) return false;
+            if (yMax != null && (Number.isNaN(y) || y > yMax)) return false;
+            if (wMin != null && (r.written == null || r.written === "" || r.written < wMin))
+              return false;
+            if (wMax != null && (r.written == null || r.written === "" || r.written > wMax))
+              return false;
+            if (cMin != null && (r.coding == null || r.coding === "" || r.coding < cMin))
+              return false;
+            if (cMax != null && (r.coding == null || r.coding === "" || r.coding > cMax))
+              return false;
+            if (
+              pMin != null &&
+              (r.personality == null || r.personality === "" || r.personality < pMin)
+            )
+              return false;
+            if (
+              pMax != null &&
+              (r.personality == null || r.personality === "" || r.personality > pMax)
+            )
+              return false;
+            return true;
+          });
+          renderTable();
+        }
+
+        function clearFilters() {
+          el.stage.value = "";
+          document.getElementById("f-education").value = "";
+          document.getElementById("f-city").value = "";
+          document.getElementById("f-years-min").value = "";
+          document.getElementById("f-years-max").value = "";
+          document.getElementById("a-written-min").value = "";
+          document.getElementById("a-written-max").value = "";
+          document.getElementById("a-coding-min").value = "";
+          document.getElementById("a-coding-max").value = "";
+          document.getElementById("a-personality-min").value = "";
+          document.getElementById("a-personality-max").value = "";
+          filtered = candidates.slice();
+          renderTable();
+        }
+
+        function renderTable() {
+          el.count.textContent = String(filtered.length);
+          el.tbody.innerHTML = "";
+          if (filtered.length === 0) {
+            var tr = document.createElement("tr");
+            var td = document.createElement("td");
+            td.colSpan = 12;
+            td.className = "empty-cell";
+            td.textContent = "没有符合筛选的候选人";
+            tr.appendChild(td);
+            el.tbody.appendChild(tr);
+            return;
+          }
+          filtered.forEach(function (row) {
+            var tr = document.createElement("tr");
+            tr.innerHTML =
+              "<td class=\"td-name td-soft\"></td>" +
+              "<td class=\"td-soft\"></td>" +
+              "<td class=\"td-soft tiny nowrap\"></td>" +
+              "<td class=\"td-soft tiny nowrap\"></td>" +
+              "<td class=\"td-soft tiny nowrap\"></td>" +
+              "<td class=\"td-soft nowrap\"></td>" +
+              "<td class=\"td-soft nowrap\"></td>" +
+              "<td class=\"td-soft nowrap\"></td>" +
+              "<td class=\"td-soft td-nums nowrap\"></td>" +
+              "<td class=\"td-soft td-nums nowrap\"></td>" +
+              "<td class=\"td-soft td-nums nowrap\"></td>" +
+              "<td class=\"td-soft\"></td>";
+            var cells = tr.querySelectorAll("td");
+            cells[0].textContent = row.name;
+            cells[0].className = "td-name";
+            cells[1].textContent = row.email;
+            cells[2].textContent = STAGE_LABEL[row.stage];
+            cells[3].textContent = sourceLabel(row.source);
+            cells[4].textContent = row.expectedSalary || "—";
+            cells[5].textContent = row.education || "—";
+            cells[6].textContent = row.years || "—";
+            cells[7].textContent = row.city || "—";
+            cells[8].textContent =
+              row.written == null || row.written === "" ? "—" : String(row.written);
+            cells[9].textContent =
+              row.coding == null || row.coding === "" ? "—" : String(row.coding);
+            cells[10].textContent =
+              row.personality == null || row.personality === ""
+                ? "—"
+                : String(row.personality);
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "link-edit";
+            btn.textContent = "编辑";
+            btn.dataset.id = row.id;
+            btn.addEventListener("click", function () {
+              openEditor("edit", row.id);
+            });
+            cells[11].appendChild(btn);
+            el.tbody.appendChild(tr);
+          });
+        }
+
+        function showModal(id, on) {
+          document.getElementById(id).classList.toggle("show", on);
+        }
+
+        function closeEditor() {
+          showModal("modal-editor", false);
+          clearResumePreview();
+          document.getElementById("editor-err").classList.add("hidden");
+        }
+
+        function clearResumePreview() {
+          var prev = document.getElementById("resume-preview");
+          prev.classList.add("hidden");
+          prev.removeAttribute("src");
+          if (resumeObjectUrl) {
+            URL.revokeObjectURL(resumeObjectUrl);
+            resumeObjectUrl = null;
+          }
+          document.getElementById("btn-ocr").disabled = true;
+          document.getElementById("ocr-notice").classList.add("hidden");
+          document.getElementById("resume-file").value = "";
+        }
+
+        function openEditor(mode, id) {
+          editorMode = mode;
+          editingId = id;
+          document.getElementById("editor-title").textContent =
+            mode === "create" ? "新建候选人" : "编辑候选人";
+          document.getElementById("ed-requeue-wrap").classList.toggle("hidden", mode === "create");
+          document.getElementById("edit-only-actions").style.display =
+            mode === "create" ? "none" : "flex";
+
+          var row =
+            mode === "create"
+              ? {
+                  name: "",
+                  email: "",
+                  phone: "",
+                  note: "",
+                  source: "OTHER",
+                  stage: "RESUME_FIRST",
+                  expectedSalary: "",
+                  education: "",
+                  years: "",
+                  city: "",
+                  written: "",
+                  coding: "",
+                  personality: "",
+                }
+              : candidates.find(function (c) {
+                  return c.id === id;
+                });
+
+          document.getElementById("ed-name").value = row.name;
+          document.getElementById("ed-email").value = row.email;
+          document.getElementById("ed-phone").value = row.phone || "";
+          document.getElementById("ed-note").value = row.note || "";
+          edSource.value = row.source;
+          edStage.value = row.stage;
+          document.getElementById("ed-salary").value = row.expectedSalary || "";
+          document.getElementById("ed-requeue").checked = false;
+          document.getElementById("ed-edu").value = row.education || "";
+          document.getElementById("ed-years").value = row.years || "";
+          document.getElementById("ed-city").value = row.city || "";
+          document.getElementById("ed-written").value =
+            row.written === "" || row.written == null ? "" : String(row.written);
+          document.getElementById("ed-coding").value =
+            row.coding === "" || row.coding == null ? "" : String(row.coding);
+          document.getElementById("ed-personality").value =
+            row.personality === "" || row.personality == null ? "" : String(row.personality);
+
+          clearResumePreview();
+          document.getElementById("editor-err").classList.add("hidden");
+          showModal("modal-editor", true);
+        }
+
+        function setErr(msg) {
+          var e = document.getElementById("editor-err");
+          if (msg) {
+            e.textContent = msg;
+            e.classList.remove("hidden");
+          } else {
+            e.classList.add("hidden");
+          }
+        }
+
+        document.getElementById("btn-save").addEventListener("click", function () {
+          setErr("");
+          var name = document.getElementById("ed-name").value.trim();
+          var email = document.getElementById("ed-email").value.trim();
+          if (!name || !email) {
+            setErr("请填写姓名与邮箱");
+            return;
+          }
+          var yearsRaw = document.getElementById("ed-years").value.trim();
+          if (yearsRaw) {
+            var yn = Number(yearsRaw);
+            if (!Number.isFinite(yn)) {
+              setErr("「工作年限」请填写有效数字");
+              return;
+            }
+          }
+          var wSc = numOrNull(document.getElementById("ed-written").value);
+          var cSc = numOrNull(document.getElementById("ed-coding").value);
+          var pSc = numOrNull(document.getElementById("ed-personality").value);
+          var payload = {
+            name: name,
+            email: email,
+            phone: document.getElementById("ed-phone").value.trim(),
+            note: document.getElementById("ed-note").value.trim(),
+            source: edSource.value,
+            stage: edStage.value,
+            expectedSalary: document.getElementById("ed-salary").value.trim(),
+            education: document.getElementById("ed-edu").value,
+            years: yearsRaw,
+            city: document.getElementById("ed-city").value.trim(),
+            written: wSc != null ? wSc : "",
+            coding: cSc != null ? cSc : "",
+            personality: pSc != null ? pSc : "",
+          };
+
+          if (editorMode === "create") {
+            payload.id = "local-" + Date.now();
+            candidates.push(payload);
+          } else {
+            var idx = candidates.findIndex(function (c) {
+              return c.id === editingId;
+            });
+            if (idx < 0) return;
+            var requeue = document.getElementById("ed-requeue").checked;
+            payload.id = editingId;
+            payload.stage = requeue ? "RESUME_FIRST" : edStage.value;
+            candidates[idx] = payload;
+          }
+          closeEditor();
+          applyFilters();
+        });
+
+        document.getElementById("btn-delete").addEventListener("click", function () {
+          if (editorMode !== "edit" || !editingId) return;
+          if (!confirm("确定删除该候选人？")) return;
+          candidates = candidates.filter(function (c) {
+            return c.id !== editingId;
+          });
+          closeEditor();
+          applyFilters();
+        });
+
+        document.getElementById("btn-talent-pool").addEventListener("click", function () {
+          if (editorMode !== "edit" || !editingId) return;
+          if (!confirm("发送人才库通知邮件，并将候选人移入「人才库」？")) return;
+          var idx = candidates.findIndex(function (c) {
+            return c.id === editingId;
+          });
+          if (idx >= 0) {
+            candidates[idx].stage = "TALENT_POOL";
+          }
+          closeEditor();
+          applyFilters();
+        });
+
+        document.getElementById("btn-new").addEventListener("click", function () {
+          openEditor("create", null);
+        });
+
+        document.getElementById("btn-apply-filter").addEventListener("click", applyFilters);
+        document.getElementById("btn-clear-filter").addEventListener("click", clearFilters);
+
+        document.querySelectorAll("[data-close]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            var k = b.getAttribute("data-close");
+            if (k === "editor") closeEditor();
+            else showModal("modal-" + k, false);
+          });
+        });
+
+        document.getElementById("btn-open-about").addEventListener("click", function () {
+          showModal("modal-about", true);
+        });
+        document.getElementById("btn-open-agent").addEventListener("click", function () {
+          showModal("modal-agent", true);
+        });
+        document.getElementById("mascot-open").addEventListener("click", function () {
+          showModal("modal-agent", true);
+        });
+
+        document.getElementById("resume-file").addEventListener("change", function (e) {
+          var f = e.target.files && e.target.files[0];
+          if (!f) return;
+          if (resumeObjectUrl) URL.revokeObjectURL(resumeObjectUrl);
+          resumeObjectUrl = URL.createObjectURL(f);
+          var img = document.getElementById("resume-preview");
+          img.src = resumeObjectUrl;
+          img.classList.remove("hidden");
+          document.getElementById("btn-ocr").disabled = false;
+          document.getElementById("ocr-notice").classList.add("hidden");
+        });
+
+        document.getElementById("btn-ocr").addEventListener("click", function () {
+          document.getElementById("ocr-notice").textContent =
+            "静态演示：识别接口未连接，请在完整朝聘应用中上传。";
+          document.getElementById("ocr-notice").classList.remove("hidden");
+        });
+
+        /* 吉祥物换边 */
+        var mascotRight = true;
+        document.getElementById("mascot-flip").addEventListener("click", function () {
+          mascotRight = !mascotRight;
+          var m = document.getElementById("mascot");
+          m.style.right = mascotRight ? "0" : "auto";
+          m.style.left = mascotRight ? "auto" : "0";
+          m.style.alignItems = mascotRight ? "flex-end" : "flex-start";
+          document.querySelector(".mascot-note").style.textAlign = mascotRight ? "right" : "left";
+          document.querySelector(".mascot-note").style.paddingRight = mascotRight ? "0.25rem" : "0";
+          document.querySelector(".mascot-note").style.paddingLeft = mascotRight ? "0" : "0.25rem";
+          document.getElementById("mascot-flip").textContent = mascotRight ? "换到左侧" : "换到右侧";
+        });
+
+        window.addEventListener("keydown", function (e) {
+          if (e.key !== "Escape") return;
+          if (document.getElementById("modal-editor").classList.contains("show")) closeEditor();
+          showModal("modal-about", false);
+          showModal("modal-agent", false);
+        });
+
+        /* 初始：与已加载列表一致，无「加载中」行 */
+        filtered = candidates.slice();
+        renderTable();
+      })();
+    </script>
+  </body>
+</html>

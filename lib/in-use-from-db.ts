@@ -1,18 +1,18 @@
 import { prisma } from "@/lib/prisma";
 
-/** 从 SQLite 读真实 inUse（避免 Prisma Client 未 generate 时 ORM 结果缺列） */
+/** 读取真实 inUse（Postgres/SQLite 通用） */
 export async function loadFieldInUseMap(): Promise<Map<string, boolean>> {
-  const rows = await prisma.$queryRawUnsafe<Array<{ id: string; inUse: number }>>(
-    "SELECT id, inUse FROM CustomField",
-  );
-  return new Map(rows.map((r) => [r.id, Number(r.inUse) !== 0]));
+  const rows = await prisma.customField.findMany({
+    select: { id: true, inUse: true },
+  });
+  return new Map(rows.map((r) => [r.id, r.inUse !== false]));
 }
 
 export async function loadAssessmentInUseMap(): Promise<Map<string, boolean>> {
-  const rows = await prisma.$queryRawUnsafe<Array<{ id: string; inUse: number }>>(
-    "SELECT id, inUse FROM Assessment",
-  );
-  return new Map(rows.map((r) => [r.id, Number(r.inUse) !== 0]));
+  const rows = await prisma.assessment.findMany({
+    select: { id: true, inUse: true },
+  });
+  return new Map(rows.map((r) => [r.id, r.inUse !== false]));
 }
 
 export function applyFieldInUse<T extends { id: string }>(

@@ -1,12 +1,17 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   let candidateCount = 0;
   let fieldCount = 0;
   let assessmentCount = 0;
   let dataError: string | null = null;
   try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL missing");
+    }
     [candidateCount, fieldCount, assessmentCount] = await Promise.all([
       prisma.candidate.count(),
       prisma.customField.count(),
@@ -14,7 +19,7 @@ export default async function HomePage() {
     ]);
   } catch {
     dataError =
-      "暂时无法读取数据库（请确认云上已挂载 /data 卷、启动日志里 prisma db push 成功，或稍后重试）。";
+      "暂时无法读取数据库：请确认已配置 DATABASE_URL，并完成 prisma db push / db:seed。";
   }
 
   return (

@@ -1,11 +1,10 @@
-import type { PipelineStage } from "@prisma/client";
 import {
   applyNameToMailBody,
   MAIL_DEFAULTS,
   parseEmailNotify,
   type AgentEmailNotify,
 } from "./agent-mail-templates";
-import { AGENT_STAGE_OPTIONS, PIPELINE_STAGES } from "./pipeline-labels";
+import { AGENT_STAGE_OPTIONS, PIPELINE_STAGES, type PipelineStage } from "./pipeline-labels";
 
 export type { AgentEmailNotify } from "./agent-mail-templates";
 

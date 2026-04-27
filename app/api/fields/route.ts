@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { FieldType } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+
+type FieldType = "SELECT" | "TEXT" | "NUMBER";
 
 function slugKey(label: string): string {
   const base = label
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
       label: body.label.trim(),
       type: body.type,
       options:
-        body.type === FieldType.SELECT && body.options?.length
+        body.type === "SELECT" && body.options?.length
           ? JSON.stringify(body.options)
           : null,
       sortOrder: (maxOrder._max.sortOrder ?? -1) + 1,

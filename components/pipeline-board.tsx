@@ -1,10 +1,12 @@
 "use client";
 
-import type { Assessment, Candidate, CustomField, PipelineStage } from "@prisma/client";
+import type { Assessment, Candidate, CustomField } from "@prisma/client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PIPELINE_STAGES, STAGE_LABEL } from "@/lib/pipeline-labels";
 import { sourceLabel } from "@/lib/candidate-source";
 import { CandidateEditor } from "./candidate-editor";
+
+type PipelineStage = string;
 
 type Row = Candidate & {
   fieldValues: { value: string; field: CustomField }[];

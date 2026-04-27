@@ -41,7 +41,7 @@ export async function POST() {
   for (const c of pending) {
     const S = c.stage;
 
-    if (rules.personalityStages.includes(S) && personalityKeyConfigured) {
+    if (rules.personalityStages.includes(S as (typeof rules.personalityStages)[number]) && personalityKeyConfigured) {
       const score = getPersonalityScore(c, rules.personalityAssessmentKey);
       if (score == null) {
         lines.push(`「${c.name}」跳过：未填写性格测试分数`);
@@ -77,7 +77,7 @@ export async function POST() {
       continue;
     }
 
-    if (rules.resumeRuleStages.includes(S)) {
+    if (rules.resumeRuleStages.includes(S as (typeof rules.resumeRuleStages)[number])) {
       const { pass, reasons } = evaluateAgentPass(c, rules);
       if (pass) {
         await prisma.candidate.update({

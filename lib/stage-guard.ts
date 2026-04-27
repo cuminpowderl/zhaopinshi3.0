@@ -1,5 +1,4 @@
-import type { PipelineStage } from "@prisma/client";
-import { PIPELINE_STAGES } from "./pipeline-labels";
+import { PIPELINE_STAGES, type PipelineStage } from "./pipeline-labels";
 
 export function parsePipelineStage(
   raw: string | null | undefined,

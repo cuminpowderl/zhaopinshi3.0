@@ -1,4 +1,14 @@
-import type { PipelineStage } from "@prisma/client";
+export type PipelineStage =
+  | "RESUME_FIRST"
+  | "PHONE"
+  | "ONLINE_TEST"
+  | "WRITTEN_EXAM"
+  | "FIRST_INTERVIEW"
+  | "SECOND_INTERVIEW"
+  | "OFFER"
+  | "HIRED"
+  | "REJECTED"
+  | "TALENT_POOL";
 
 export const PIPELINE_STAGES: PipelineStage[] = [
   "RESUME_FIRST",

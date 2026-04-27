@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { FieldType, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(
@@ -33,12 +33,12 @@ export async function PATCH(
     data.label = body.label.trim();
   }
 
-  if (row.type === FieldType.SELECT && body.options !== undefined) {
+  if (row.type === "SELECT" && body.options !== undefined) {
     const opts = body.options.map((s) => String(s).trim()).filter(Boolean);
     data.options = opts.length ? JSON.stringify(opts) : null;
   }
 
-  if (row.type === FieldType.NUMBER) {
+  if (row.type === "NUMBER") {
     if (body.numberMin !== undefined) {
       data.numberMin =
         body.numberMin === null || Number.isNaN(Number(body.numberMin))

@@ -6,8 +6,8 @@ import {
   AGENT_STAGE_OPTIONS,
   STAGE_LABEL,
   STAGE_PASS_TARGETS,
+  type PipelineStage,
 } from "@/lib/pipeline-labels";
-import type { PipelineStage } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
 import { MascotWidget } from "./mascot-widget";
 

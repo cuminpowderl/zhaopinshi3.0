@@ -1,4 +1,4 @@
-import type { CandidateSource } from "@prisma/client";
+export type CandidateSource = "REFERRAL" | "BOSS_ZHIPIN" | "JOB51" | "SHIXISENG" | "OTHER";
 
 export const SOURCE_OPTIONS: { value: CandidateSource; label: string }[] = [
   { value: "REFERRAL", label: "内推" },
@@ -8,6 +8,6 @@ export const SOURCE_OPTIONS: { value: CandidateSource; label: string }[] = [
   { value: "OTHER", label: "其他" },
 ];
 
-export function sourceLabel(s: CandidateSource): string {
+export function sourceLabel(s: string): string {
   return SOURCE_OPTIONS.find((o) => o.value === s)?.label ?? "其他";
 }

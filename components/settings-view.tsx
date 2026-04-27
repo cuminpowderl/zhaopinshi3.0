@@ -1,10 +1,12 @@
 "use client";
 
-import type { Assessment, CustomField, FieldType } from "@prisma/client";
+import type { Assessment, CustomField } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
 import { MAIL_DEFAULTS } from "@/lib/agent-mail-templates";
 import { parseRulesJson, type AgentRules } from "@/lib/agent-rules";
 import { parseSelectOptions } from "@/lib/filters";
+
+type FieldType = "SELECT" | "TEXT" | "NUMBER";
 
 type Payload = { fields: CustomField[]; assessments: Assessment[] };
 
@@ -304,7 +306,7 @@ export function SettingsView() {
     notifyCandidatesReload();
   };
 
-  const typeLabel = (t: FieldType) => {
+  const typeLabel = (t: string) => {
     if (t === "SELECT") return "选项";
     if (t === "NUMBER") return "数字";
     return "文本";

@@ -6,8 +6,10 @@ import {
   loadFieldInUseMap,
 } from "@/lib/in-use-from-db";
 import { prisma } from "@/lib/prisma";
-import { FieldType, type CandidateSource, type PipelineStage } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+
+type CandidateSource = string;
+type PipelineStage = string;
 
 const include = {
   fieldValues: { include: { field: true } },
@@ -78,11 +80,11 @@ export async function PATCH(
           continue;
         }
         const value = String(raw).trim();
-        if (f.type === FieldType.SELECT) {
+        if (f.type === "SELECT") {
           const opts = parseSelectOptions(f.options);
           if (!opts.includes(value)) continue;
         }
-        if (f.type === FieldType.NUMBER) {
+        if (f.type === "NUMBER") {
           const n = Number(value);
           if (Number.isNaN(n)) continue;
           if (f.numberMin != null && n < f.numberMin) continue;

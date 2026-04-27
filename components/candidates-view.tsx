@@ -4,14 +4,14 @@ import type {
   Assessment,
   Candidate,
   CustomField,
-  FieldType,
-  PipelineStage,
 } from "@prisma/client";
 import { useEffect, useRef, useState } from "react";
 import { sourceLabel } from "@/lib/candidate-source";
 import { parseSelectOptions } from "@/lib/filters";
 import { PIPELINE_STAGES, STAGE_LABEL } from "@/lib/pipeline-labels";
 import { CandidateEditor } from "./candidate-editor";
+
+type PipelineStage = string;
 
 type CandidateRow = Candidate & {
   fieldValues: { value: string; field: CustomField }[];
@@ -130,7 +130,7 @@ export function CandidatesView() {
     return s != null ? String(s.score) : "—";
   };
 
-  const fieldTypeLabel = (t: FieldType) => {
+  const fieldTypeLabel = (t: string) => {
     if (t === "SELECT") return "选项";
     if (t === "NUMBER") return "数字";
     return "文本";
@@ -339,7 +339,7 @@ export function CandidatesView() {
                     <td className="px-4 py-3 font-medium text-fg">{row.name}</td>
                     <td className="px-4 py-3 text-fg-soft">{row.email}</td>
                     <td className="px-4 py-3 text-xs text-fg-soft whitespace-nowrap">
-                      {STAGE_LABEL[row.stage]}
+                      {STAGE_LABEL[row.stage as keyof typeof STAGE_LABEL] ?? row.stage}
                     </td>
                     <td className="px-4 py-3 text-xs text-fg-soft whitespace-nowrap">
                       {sourceLabel(row.source)}

@@ -3,14 +3,15 @@
 import type {
   Assessment,
   Candidate,
-  CandidateSource,
   CustomField,
-  PipelineStage,
 } from "@prisma/client";
 import { useState } from "react";
 import { SOURCE_OPTIONS } from "@/lib/candidate-source";
 import { parseSelectOptions } from "@/lib/filters";
 import { PIPELINE_STAGES, STAGE_LABEL } from "@/lib/pipeline-labels";
+
+type CandidateSource = string;
+type PipelineStage = string;
 
 type Row = Candidate & {
   fieldValues: { value: string; field: CustomField }[];

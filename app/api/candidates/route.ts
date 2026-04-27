@@ -7,8 +7,10 @@ import {
 } from "@/lib/in-use-from-db";
 import { prisma } from "@/lib/prisma";
 import { parsePipelineStage } from "@/lib/stage-guard";
-import { FieldType, type CandidateSource, type PipelineStage } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+
+type CandidateSource = string;
+type PipelineStage = string;
 
 const include = {
   fieldValues: { include: { field: true } },
@@ -79,11 +81,11 @@ export async function POST(req: NextRequest) {
       const raw = body.fields[f.key];
       if (raw == null || String(raw).trim() === "") return null;
       const value = String(raw).trim();
-      if (f.type === FieldType.SELECT) {
+      if (f.type === "SELECT") {
         const opts = parseSelectOptions(f.options);
         if (!opts.includes(value)) return null;
       }
-      if (f.type === FieldType.NUMBER) {
+      if (f.type === "NUMBER") {
         const n = Number(value);
         if (Number.isNaN(n)) return null;
         if (f.numberMin != null && n < f.numberMin) return null;

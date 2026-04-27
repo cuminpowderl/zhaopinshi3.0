@@ -1,4 +1,4 @@
-import { CandidateSource, FieldType, PipelineStage, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -34,7 +34,7 @@ async function main() {
     data: {
       key: "education",
       label: "学历",
-      type: FieldType.SELECT,
+      type: "SELECT",
       options: JSON.stringify(["专科", "本科", "硕士", "博士"]),
       sortOrder: 0,
     },
@@ -43,7 +43,7 @@ async function main() {
     data: {
       key: "years",
       label: "工作年限",
-      type: FieldType.NUMBER,
+      type: "NUMBER",
       sortOrder: 1,
     },
   });
@@ -51,7 +51,7 @@ async function main() {
     data: {
       key: "city",
       label: "期望城市",
-      type: FieldType.TEXT,
+      type: "TEXT",
       sortOrder: 2,
     },
   });
@@ -100,8 +100,8 @@ async function main() {
     written: number;
     coding: number;
     personality: number;
-    stage: PipelineStage;
-    source: CandidateSource;
+    stage: string;
+    source: string;
     expectedSalary: string;
   }[] = [
     {
